@@ -3,17 +3,18 @@ target
 
 \ Gemini PR mode
 variable data 4 ramALLOT
-: /data  data a! 5 #, for 0 #, c!+ next 
+: /data  data a! 5 #, for 0 #, c!+ next ; 
 \ : under+ ( n1 n2 n3 - m1+n3 n2)  rot + swap 
 \ : #bits ( n1 - n2)  0 #, swap
 \     31 #, for -if 1 #, under+ then 2* next drop 
-: @pins (  - n)  @MCP23017 @GPIO 16 #, lshift or 
-: press (  - n)  dup begin drop @pins until 
-: release ( n1 - n2)  begin @pins while or repeat drop 
+
+: @pins (  - n)  @MCP23017 @GPIO 16 #, lshift or ;
+: press (  - n)  dup begin drop @pins until ;
+: release ( n1 - n2)  begin @pins while or repeat drop ;
 : scan (  - n)
     begin press 30 #, ms @pins if or release exit then drop again
 
-: mark ( mask a)  data + dup >r c@ or r> c! 
+: mark ( mask a)  data + dup >r c@ or r> c! ; 
 : Gemini ( n)  /data $80 #, data c!
     dup $0100000 #, and if $40 #, 1 #, mark then drop \ S1
     dup $0200000 #, and if $10 #, 1 #, mark then drop \ T
@@ -40,19 +41,19 @@ variable data 4 ramALLOT
     dup $0000020 #, and if $40 #, 5 #, mark then drop \ #
     dup $0000040 #, and if $08 #, 3 #, mark then drop \ E
     dup $0000080 #, and if $04 #, 3 #, mark then drop \ U
-    drop 
+    drop ; 
 
 variable 'spit
-: spit  'spit @ execute 
-: >emit  ['] emit 'spit ! 
-: >hc.  ['] hc. 'spit ! 
-: send  data a! 5 #, for c@+ spit next 
+: spit  'spit @ execute ; 
+: >emit  ['] emit 'spit ! ; 
+: >hc.  ['] hc. 'spit ! ; 
+: send  data a! 5 #, for c@+ spit next ; 
 : emitHID ( c)
     ( Keyboard.begin) dup Keyboard.press 2 #, ms
-    Keyboard.release ( Keyboard.end) 
+    Keyboard.release ( Keyboard.end) ; 
 : navigate  $86 #, Keyboard.press $b3 a #, emitHID
     begin scan $20 #, = while/ $b3 #, emitHID repeat
-    Keyboard.releaseAll 
+    Keyboard.releaseAll ; 
 : go-Gemini ( n - n)
     begin
         begin scan $1000220 #, - while $1000220 #, + Gemini send repeat
@@ -64,7 +65,7 @@ cvariable former
 : spew ( c - )
     dup Keyboard.press
     former c@ if dup Keyboard.release then
-    drop former c! 
+    drop former c! ; 
 
 : send-NKRO ( n - )
     false former c!
@@ -97,21 +98,24 @@ cvariable former
     dup $20 #, and if/ [ char 3 ] #, spew then
     dup $40 #, and if/ [ char n ] #, spew then
     dup $80 #, and if/ [ char m ] #, spew then
-    drop Keyboard.releaseAll 
+    drop Keyboard.releaseAll ; 
 : go-NKRO
     begin scan send-NKRO again
 
-0 [if]
+1 [if]
 \ Jackdaw mode
 variable stroke \ remember the last stroke
 cvariable left
 cvariable center
 cvariable right
-: ekey? (  - flag)  stroke @ $100 #, and 
-: ykey? (  - flag)  stroke @ $400 #, and 
-: !left ( c - )  left c@ or left c! 
-: !right ( c - )  right c@ or right c! 
-: !center ( c - )  center c@ or center c! 
+: ekey? (  - flag)  stroke @ $100 #, and 0= 0= ;
+: ykey? (  - flag)  stroke @ $400 #, and 0= 0= ;
+: *key1? (  - flag)  stroke @ $1000000 #, - 0= ;
+: *key2? (  - flag)  stroke @ $200 #, - 0= ;
+: *keys? (  - flag)  stroke @ $1000200 #, - 0= ;
+: !left ( c - )  left c@ or left c! ; 
+: !right ( c - )  right c@ or right c! ; 
+: !center ( c - )  center c@ or center c! ; 
 
 : arrange ( n - )
     dup stroke !
@@ -137,7 +141,7 @@ cvariable right
     dup $20 #, and if/ $04 #, !center then \ a
     dup $40 #, and if/ $08 #, !center then \ o
     dup $80 #, and if/ $10 #, !center then \ u
-    drop 
+    drop ; 
 
 \ left hand strings
 -create l00 0 ,
@@ -794,40 +798,31 @@ create right-table
   rf8 , rf9 , rfa , rfb , rfc , rfd , rfe , rff ,
 [then]
 
-0 [if]
+1 [if]
 : typeHID ( a - )
     p! @p+ 1- -if drop exit then for @p+ emitHID next ;
-: Jackdaw
-    begin
-        scan arrange
+: write
+    left c@ $5a #, - if/
         left c@ left-table + @p typeHID
         center c@ center-table + @p typeHID
-\        right c@ right-table + @p typeHID
+        right c@ right-table + @p typeHID
+        exit
+    then
+    *keys? if/ 32 #, emitHID then
+    *key1? if/  8 #, emitHID then
+    *key2? if/  8 #, emitHID then
+    ;
+: Jackdaw
+    begin
+        scan arrange write
     again
 [then]
 
-: init  ( initMCP23017) initGPIO ;
+: init  initMCP23017 initGPIO ;
 turnkey decimal init Keyboard.begin
     ( >hc.) interpret
 \    >emit go-Gemini
 \    go-NKRO
 \    Jackdaw
-0 [if]
-    key emit cr -1 #, h. cr
-    $1234 #, dup h. cr
-    16 #, lshift dup h. cr 
-    $abcd #, dup h. cr
-    or dup h. cr
-    hex  dup dup .s cr
-    begin again
-[then]
-0 [if]
-    begin interpret
-\    begin .s cr query space find while
-\        execute depth -if huh? then drop
-\    repeat tib count type huh?
-    again
-
-[then]
 
 
