@@ -187,7 +187,7 @@ cvariable base
     over over - -if drop swap drop exit then
     drop drop ;
 
-1 [if] \ these were used before <# # #> were defined
+0 [if] \ these were used before <# # #> were defined
 -: dig ( n1 - n2 n3)  dup 2/ 2/ 2/ 2/ swap
     $0f #, and $0a #, - -if $3a #, + exit then
     $61 #, + ;
@@ -206,7 +206,7 @@ cvariable base
 : hc. ( c - )
     dig >r dig emit r> emit drop space ;
 [then]
-0 [if]
+1 [if]
 : h. ( n - )  base c@ >r hex 0 #,
     <# # # # # # # # # #> type space r> base c! ;
 : hw. ( n - )  base c@ >r hex 0 #,

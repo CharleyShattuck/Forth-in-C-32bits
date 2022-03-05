@@ -178,10 +178,9 @@ false	core.fs	+183
 true	core.fs	+184
 BL	core.fs	+185
 max	core.fs	+186
-dig	core.fs	+191
-h.	core.fs	+194
-hw.	core.fs	+201
-hc.	core.fs	+206
+h.	core.fs	+210
+hw.	core.fs	+212
+hc.	core.fs	+214
 d	core.fs	+218
 r	core.fs	+219
 .word	core.fs	+220

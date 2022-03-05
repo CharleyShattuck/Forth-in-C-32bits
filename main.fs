@@ -808,14 +808,26 @@ create right-table
 
 : init  ( initMCP23017) initGPIO ;
 turnkey decimal init Keyboard.begin
-\   >hc. interpret
+    ( >hc.) interpret
 \    >emit go-Gemini
 \    go-NKRO
 \    Jackdaw
+0 [if]
     key emit cr -1 #, h. cr
     $1234 #, dup h. cr
     16 #, lshift dup h. cr 
     $abcd #, dup h. cr
     or dup h. cr
+    hex  dup dup .s cr
     begin again
+[then]
+0 [if]
+    begin interpret
+\    begin .s cr query space find while
+\        execute depth -if huh? then drop
+\    repeat tib count type huh?
+    again
+
+[then]
+
 
