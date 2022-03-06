@@ -497,6 +497,11 @@ void _Keyboard_end(){
     Keyboard.end();
 }
 
+void _Keyboard_write(){
+    Keyboard.write(T);
+    DROP;
+}
+
 void _execute();
 
 void (*function[])()={
@@ -519,7 +524,7 @@ void (*function[])()={
     _initGPIO , _fetchGPIO , _lshift , _rshift , // 66
     _Keyboard_begin , _Keyboard_press , // 68
     _Keyboard_release , _Keyboard_releaseAll , _Keyboard_end , // 71
-    _dropzbranch , // 72
+    _dropzbranch , _Keyboard_write , // 73
 };
 
 void _execute(){

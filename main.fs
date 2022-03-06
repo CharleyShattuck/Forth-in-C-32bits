@@ -3,9 +3,9 @@ target
 
 \ Gemini PR mode
 variable data 4 ramALLOT
-: /data  data a! 5 #, for 0 #, c!+ next ; 
+: /data  data a! 5 #, for false c!+ next ; 
 \ : under+ ( n1 n2 n3 - m1+n3 n2)  rot + swap 
-\ : #bits ( n1 - n2)  0 #, swap
+\ : #bits ( n1 - n2)  false swap
 \     31 #, for -if 1 #, under+ then 2* next drop 
 
 : @pins (  - n)  @MCP23017 @GPIO 16 #, lshift or ;
@@ -47,10 +47,15 @@ variable 'spit
 : spit  'spit @ execute ; 
 : >emit  ['] emit 'spit ! ; 
 : >hc.  ['] hc. 'spit ! ; 
-: send  data a! 5 #, for c@+ spit next ; 
-: emitHID ( c)
-    ( Keyboard.begin) dup Keyboard.press 2 #, ms
-    Keyboard.release ( Keyboard.end) ; 
+: send  data a! 5 #, for c@+ spit next ;
+cvariable capping
+: +caps  true capping c! ;
+: -caps  false capping c! ;
+: emitHIDcaps ( c)
+    capping c@ if/ ( shift) $81 #, Keyboard.press -caps then
+    Keyboard.press 2 #, ms
+    Keyboard.releaseAll ; 
+: emitHID  Keyboard.write ;
 : navigate  $86 #, Keyboard.press $b3 a #, emitHID
     begin scan $20 #, = while/ $b3 #, emitHID repeat
     Keyboard.releaseAll ; 
@@ -110,16 +115,16 @@ cvariable center
 cvariable right
 : ekey? (  - flag)  stroke @ $100 #, and 0= 0= ;
 : ykey? (  - flag)  stroke @ $400 #, and 0= 0= ;
-: *key1? (  - flag)  stroke @ $1000000 #, - 0= ;
-: *key2? (  - flag)  stroke @ $200 #, - 0= ;
-: *keys? (  - flag)  stroke @ $1000200 #, - 0= ;
+: *key1? (  - flag)  stroke @ $1000000 #, = ;
+: *key2? (  - flag)  stroke @ $200 #, = ;
+: *keys? (  - flag)  stroke @ $1000200 #, = ;
 : !left ( c - )  left c@ or left c! ; 
 : !right ( c - )  right c@ or right c! ; 
 : !center ( c - )  center c@ or center c! ; 
 
 : arrange ( n - )
     dup stroke !
-    0 #, dup right c! dup left c! center c!
+    false dup right c! dup left c! center c!
     dup $100000 #, and if/ $01 #, !left then \ a
     dup $200000 #, and if/ $04 #, !left then \ c
     dup $400000 #, and if/ $10 #, !left then \ w
@@ -800,29 +805,51 @@ create right-table
 
 1 [if]
 : typeHID ( a - )
-    p! @p+ 1- -if drop exit then for @p+ emitHID next ;
+    p! @p+ 1- -if drop exit then for @p+ emitHIDcaps next ;
+: spaceHID  32 #, emitHID ;
+: crHID  13 #, emitHID  10 #, emitHID ;
+: escapeHID  $b1 #, emitHID ;
 : write
-    left c@ $5a #, - if/
+    *key1? *key2? or if/  8 #, emitHID exit then  \ backspace
+    center c@ 0= if/  \ cr . , ! ?
+        left c@ $a0 #, =  right c@ $0a #, = and if/
+            crHID exit then
+        left c@ $14 #, =  right c@ $14 #, = and if/
+            char . #, emitHID spaceHID +caps exit then
+        left c@ $28 #, =  right c@ $28 #, = and if/
+            char , #, emitHID spaceHID exit then
+        left c@ $14 #, =  right c@ $28 #, = and if/
+            char ! #, emitHID spaceHID +caps exit then
+        left c@ $28 #, =  right c@ $14 #, = and if/
+            char ? #, emitHID spaceHID +caps exit then
+    then
+    left c@ $5a #, - if/ \ alphabet tables 
+        stroke @ $1000200 #, and if/ spaceHID then
         left c@ left-table + @p typeHID
         center c@ center-table + @p typeHID
         right c@ right-table + @p typeHID
         exit
-    then
-    *keys? if/ 32 #, emitHID then
-    *key1? if/  8 #, emitHID then
-    *key2? if/  8 #, emitHID then
+    then \ Emily's symbols
+    right c@ 0= stroke @ $1000200 #, and or if/
+        true capping c! then
+    right c@ 0= center c@ $18 #, = and if/  \ space
+        spaceHID exit then
+    right c@ $21 #, = if/
+        center c@ $18 #, = if/  \ escape
+            escapeHID exit then then
     ;
 : Jackdaw
-    begin
-        scan arrange write
+    begin scan arrange write cr .s
     again
 [then]
 
 : init  initMCP23017 initGPIO ;
-turnkey decimal init Keyboard.begin
+turnkey decimal init Keyboard.begin false capping c!
     ( >hc.) interpret
 \    >emit go-Gemini
 \    go-NKRO
 \    Jackdaw
-
+\    begin char i #, emitHID char t #, emitHID
+\    32 #, emitHID char i #, emitHID char s #, emitHID
+\    13 #, emitHID  10 #, emitHID  1000 #, ms again
 
