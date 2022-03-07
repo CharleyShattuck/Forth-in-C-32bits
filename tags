@@ -790,8 +790,11 @@ typeHID	main.fs	+807
 spaceHID	main.fs	+809
 crHID	main.fs	+810
 escapeHID	main.fs	+811
-write	main.fs	+812
-Jackdaw	main.fs	+841
-init	main.fs	+846
+backspaceHID	main.fs	+812
+right-thumb	main.fs	+813
+Emily	main.fs	+814
+write	main.fs	+819
+Jackdaw	main.fs	+911
+init	main.fs	+916
 .stack	job.fs	+56
 check	job.fs	+57

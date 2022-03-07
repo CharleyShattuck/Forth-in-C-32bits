@@ -809,8 +809,15 @@ create right-table
 : spaceHID  32 #, emitHID ;
 : crHID  13 #, emitHID  10 #, emitHID ;
 : escapeHID  $b1 #, emitHID ;
+: backspaceHID  $08 #, emitHID ;
+: right-thumb ( c -  flag)  center c@ $18 #, and = ;
+: Emily ( c - )
+    center c@ 1 #, and if/ spaceHID then
+    emitHID
+    center c@ 2 #, and if/ spaceHID then
+    r> drop ;
 : write
-    *key1? *key2? or if/  8 #, emitHID exit then  \ backspace
+    *key1? *key2? or if/ backspaceHID exit then
     center c@ 0= if/  \ cr . , ! ?
         left c@ $a0 #, =  right c@ $0a #, = and if/
             crHID exit then
@@ -822,21 +829,84 @@ create right-table
             char ! #, emitHID spaceHID +caps exit then
         left c@ $28 #, =  right c@ $14 #, = and if/
             char ? #, emitHID spaceHID +caps exit then
-    then
-    left c@ $5a #, - if/ \ alphabet tables 
+    then \ alphabet tables 
+    left c@ $5a #, - if/
         stroke @ $1000200 #, and if/ spaceHID then
         left c@ left-table + @p typeHID
         center c@ center-table + @p typeHID
         right c@ right-table + @p typeHID
+        ekey? if/ char e #, emitHID then
+        ykey? if/ char y #, emitHID then
         exit
     then \ Emily's symbols
-    right c@ 0= stroke @ $1000200 #, and or if/
-        true capping c! then
+    right c@ 0= stroke @ $1000200 #, and or if/  \ caps on
+        true capping c! exit then
     right c@ 0= center c@ $18 #, = and if/  \ space
         spaceHID exit then
-    right c@ $21 #, = if/
+    right c@ $21 #, = if/ \ XOO
+        center c@ 0= if/  \ 00X \ tab
+            $b3 #, Emily then
+        center c@ $08 #, = if/  \ backspace
+            $b2 #, Emily then
+        center c@ $10 #, = if/  \ delete
+            $d4 #, Emily then
         center c@ $18 #, = if/  \ escape
-            escapeHID exit then then
+            $b1 #, Emily then
+    then
+    right c@ $2e #, = if/ \ 0XO
+        center c@ 0= if/  \ XXX \ up
+            $da #, Emily then
+        center c@ $08 #, = if/  \ left
+            $d8 #, Emily then
+        center c@ $10 #, = if/  \ right
+            $d7 #, Emily then
+        center c@ $18 #, = if/  \ down
+            $d9 #, Emily then
+    then
+    right c@ $2f #, = if/ \ XXO
+        center c@ 0= if/  \ XXX \ page up
+            $d3 #, Emily then
+        center c@ $08 #, = if/  \ home
+            $d2 #, Emily then
+        center c@ $10 #, = if/  \ end
+            $d5 #, Emily then
+        center c@ $18 #, = if/  \ page down
+            $d6 #, Emily then
+    then
+    right c@ $03 #, = if/    \ XOO
+        char ! #, Emily then \ XOO
+    right c@ $05 #, = if/    \ XXO
+        char " #, Emily then \ OOO 
+    right c@ $33 #, = if/    \ XOX
+        char # #, Emily then \ XOX
+    right c@ $1e #, = if/    \ OXX
+        char $ #, Emily then \ XXO
+    right c@ $0f #, = if/    \ XXO
+        char % #, Emily then \ XXO
+    right c@ $29 #, = if/    \ XOO
+        char & #, Emily then \ OXX
+    right c@ $01 #, = if/    \ XOO
+        char ' #, Emily then \ OOO
+    right c@ $15 #, = if/       \ XXX
+        $00 #, right-thumb if/  \ OOO \ (
+            $28 #, Emily then
+        $08 #, right-thumb if/        \ [
+            $5b #, Emily then
+        $10 #, right-thumb if/        \ <
+            $3c #, Emily then
+        $18 #, right-thumb if/        \ {
+            $7b #, Emily then
+    then
+    right c@ $2a #, = if/       \ OOO 
+        $00 #, right-thumb if/  \ XXX \ )
+            char ) #, Emily then
+        $08 #, right-thumb if/        \ ]
+            char ] #, Emily then
+        $10 #, right-thumb if/        \ >
+            char > #, Emily then
+        $18 #, right-thumb if/        \ }
+            char } #, Emily then
+    then
     ;
 : Jackdaw
     begin scan arrange write cr .s
@@ -849,7 +919,4 @@ turnkey decimal init Keyboard.begin false capping c!
 \    >emit go-Gemini
 \    go-NKRO
 \    Jackdaw
-\    begin char i #, emitHID char t #, emitHID
-\    32 #, emitHID char i #, emitHID char s #, emitHID
-\    13 #, emitHID  10 #, emitHID  1000 #, ms again
 
