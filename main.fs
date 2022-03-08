@@ -820,6 +820,7 @@ create right-table
     $0f #, and $0a #, - -if
         $3a #, + exit then $61 #, + ;
 : write
+    right c@ $c3 #, and if/ true capping c! then
     *key1? *key2? or if/ backspaceHID exit then
     left c@ $f0 #, = if/                       \ OOXX
         right c@ $0f #, and (digit) Emily then \ OOXX
