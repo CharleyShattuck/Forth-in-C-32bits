@@ -815,7 +815,7 @@ create right-table
     center c@ 1 #, and if/ spaceHID then
     emitHID
     center c@ 2 #, and if/ spaceHID then
-    r> drop ;
+    r> drop ; \ don't need to exit after Emily
 : write
     *key1? *key2? or if/ backspaceHID exit then
     center c@ 0= if/  \ cr . , ! ?
@@ -875,16 +875,16 @@ create right-table
     then
     right c@ $03 #, = if/    \ XOO
         char ! #, Emily then \ XOO
-    right c@ $05 #, = if/    \ XXO
-        char " #, Emily then \ OOO 
+    right c@ $05 #, = if/     \ XXO
+        char " #, Emily then  \ OOO 
     right c@ $33 #, = if/    \ XOX
         char # #, Emily then \ XOX
-    right c@ $1e #, = if/    \ OXX
-        char $ #, Emily then \ XXO
+    right c@ $1e #, = if/     \ OXX
+        char $ #, Emily then  \ XXO
     right c@ $0f #, = if/    \ XXO
         char % #, Emily then \ XXO
-    right c@ $29 #, = if/    \ XOO
-        char & #, Emily then \ OXX
+    right c@ $29 #, = if/     \ XOO
+        char & #, Emily then  \ OXX
     right c@ $01 #, = if/    \ XOO
         char ' #, Emily then \ OOO
     right c@ $15 #, = if/       \ XXX
@@ -907,6 +907,41 @@ create right-table
         $18 #, right-thumb if/        \ }
             char } #, Emily then
     then
+    right c@ $10 #, = if/    \ OOX
+        char * #, Emily then \ OOO
+    right c@ $20 #, = if/     \ OOO
+        char + #, Emily then  \ OOX
+    right c@ $08 #, = if/    \ OOO
+        char , #, Emily then \ OXO
+    right c@ $14 #, = if/     \ OXX
+        char - #, Emily then  \ OOO
+    right c@ $02 #, = if/    \ OOO
+        char . #, Emily then \ XOO
+    right c@ $06 #, = if/     \ OXO
+        char / #, Emily then  \ XOO
+    right c@ $30 #, = if/    \ OOX
+        char : #, Emily then \ OOX
+    right c@ $0a #, = if/     \ OOO
+        char ; #, Emily then  \ XXO
+    right c@ $3c #, = if/    \ OXX
+        char = #, Emily then \ OXX
+    right c@ $0d #, = if/     \ XXO
+        char ? #, Emily then  \ OXO
+    right c@ $3f #, = if/    \ XXX
+        char @ #, Emily then \ XXX
+    right c@ $09 #, = if/     \ XOO
+        char \ #, Emily then  \ OXO
+    right c@ $26 #, = if/    \ OXO
+        char ^ #, Emily then \ XOX
+    right c@ $28 #, = if/     \ OOO
+        char _ #, Emily then  \ OXX
+    right c@ $04 #, = if/    \ OXO
+        char ` #, Emily then \ OOO
+    right c@ $0c #, = if/     \ OXO
+        char | #, Emily then  \ OXO
+    right c@ $2d #, = if/    \ XXO
+        char ~ #, Emily then \ OXX
+    false capping c!  \ default
     ;
 : Jackdaw
     begin scan arrange write cr .s
