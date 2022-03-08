@@ -816,8 +816,13 @@ create right-table
     emitHID
     center c@ 2 #, and if/ spaceHID then
     r> drop ; \ don't need to exit after Emily
+: (digit) ( n - c)
+    $0f #, and $0a #, - -if
+        $3a #, + exit then $61 #, + ;
 : write
     *key1? *key2? or if/ backspaceHID exit then
+    left c@ $f0 #, = if/                       \ OOXX
+        right c@ $0f #, and (digit) Emily then \ OOXX
     center c@ 0= if/  \ cr . , ! ?
         left c@ $a0 #, =  right c@ $0a #, = and if/
             crHID exit then
@@ -829,7 +834,7 @@ create right-table
             char ! #, emitHID spaceHID +caps exit then
         left c@ $28 #, =  right c@ $14 #, = and if/
             char ? #, emitHID spaceHID +caps exit then
-    then \ alphabet tables 
+    then \ alphabet tables
     left c@ $5a #, - if/
         stroke @ $1000200 #, and if/ spaceHID then
         left c@ left-table + @p typeHID
