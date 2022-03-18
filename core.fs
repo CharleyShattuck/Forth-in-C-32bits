@@ -107,6 +107,7 @@ code Keyboard.releaseAll  70 ,
 \ code Keyboard.end  71 ,
 -code /branch  72 ,
 code Keyboard.write 73 ,
+code serial? 74 ,
 
 :m begin (  - a)  here m;
 :m again ( a)  branch [ 2/ ] , m;
@@ -262,4 +263,6 @@ here [ 4 + constant dict ]
     begin .s cr query space find while
         execute depth -if huh? then drop
     repeat tib count type huh?
+
+: c+! ( c a - ) swap over c@ + swap c! ;
 

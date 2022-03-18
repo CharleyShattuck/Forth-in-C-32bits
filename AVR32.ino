@@ -438,6 +438,7 @@ void _fetchMCP23017(){
 
 // all the I/O pins needed for the steno keyboard
 void _initGPIO(){
+    pinMode(7, INPUT_PULLUP);
     pinMode(9, INPUT_PULLUP);
     pinMode(10, INPUT_PULLUP);
     pinMode(11, INPUT_PULLUP);
@@ -461,6 +462,11 @@ void _fetchGPIO(){
     T|=digitalRead(A4)<<7;
     T|=digitalRead(A5)<<8;
     T^=0x01ff;
+}
+
+void _fetchSLIDER(){
+    DUP;
+    T=digitalRead(7);
 }
 
 void _lshift(){
@@ -524,7 +530,7 @@ void (*function[])()={
     _initGPIO , _fetchGPIO , _lshift , _rshift , // 66
     _Keyboard_begin , _Keyboard_press , // 68
     _Keyboard_release , _Keyboard_releaseAll , _Keyboard_end , // 71
-    _dropzbranch , _Keyboard_write , // 73
+    _dropzbranch , _Keyboard_write , _fetchSLIDER , // 74
 };
 
 void _execute(){

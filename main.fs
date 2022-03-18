@@ -9,10 +9,10 @@ variable data 4 ramALLOT
 \     31 #, for -if 1 #, under+ then 2* next drop 
 
 : @pins (  - n)  @MCP23017 @GPIO 16 #, lshift or ;
-: press (  - n)  dup begin drop @pins until ;
+: press (  - n)  false begin drop @pins until ;
 : release ( n1 - n2)  begin @pins while or repeat drop ;
 : scan (  - n)
-    begin press 30 #, ms @pins if or release exit then drop again
+    begin press 30 #, ms @pins if or release exit then drop drop again
 
 : mark ( mask a)  data + dup >r c@ or r> c! ; 
 : Gemini ( n)  /data $80 #, data c!
@@ -48,23 +48,30 @@ variable 'spit
 : >emit  ['] emit 'spit ! ; 
 : >hc.  ['] hc. 'spit ! ; 
 : send  data a! 5 #, for c@+ spit next ;
+
 cvariable capping
 : +caps  true capping c! ;
 : -caps  false capping c! ;
-: emitHIDcaps ( c)
-    capping c@ if/ ( shift) $81 #, Keyboard.press -caps then
+
+cvariable now
+cvariable before
+: +now  now c@ 1+ now c! ;
+: emitHIDcaps ( c)  +now
+    capping c@ if/ ( shift) $81 #, Keyboard.press -caps 2 #, ms then
     Keyboard.press 2 #, ms
-    Keyboard.releaseAll ; 
-: emitHID  Keyboard.write ;
+    Keyboard.releaseAll 2 #, ms ; 
+: emitHID  +now Keyboard.write 2 #, ms ;
+
 : navigate  $86 #, Keyboard.press $b3 a #, emitHID
     begin scan $20 #, = while/ $b3 #, emitHID repeat
-    Keyboard.releaseAll ; 
+    Keyboard.releaseAll ;
 : go-Gemini ( n - n)
     begin
         begin scan $1000220 #, - while $1000220 #, + Gemini send repeat
         drop navigate
     again
 
+0 [if]
 \ NKRO keyboard mode
 cvariable former
 : spew ( c - )
@@ -106,8 +113,8 @@ cvariable former
     drop Keyboard.releaseAll ; 
 : go-NKRO
     begin scan send-NKRO again
+[then]
 
-1 [if]
 \ Jackdaw mode
 variable stroke \ remember the last stroke
 cvariable left
@@ -147,6 +154,34 @@ cvariable right
     dup $40 #, and if/ $08 #, !center then \ o
     dup $80 #, and if/ $10 #, !center then \ u
     drop ; 
+
+: display ( n - )
+    dup $100000 #, and if/  char a #, emit then
+    dup  $80000 #, and if/  char s #, emit then
+    dup $200000 #, and if/  char c #, emit then
+    dup  $40000 #, and if/  char t #, emit then
+    dup $400000 #, and if/  char w #, emit then
+    dup  $20000 #, and if/  char h #, emit then
+    dup $800000 #, and if/  char n #, emit then
+    dup  $10000 #, and if/  char r #, emit then
+    char . #, emit
+    stroke @ $1000000 #, and if/ char * #, emit space then
+    dup $08 #, and if/  char i #, emit then
+    dup $10 #, and if/  char e #, emit then
+    dup $20 #, and if/  char a #, emit then
+    dup $40 #, and if/  char o #, emit then
+    dup $80 #, and if/  char u #, emit then
+    stroke @ $200 #, and if/ space char * #, emit then
+    char . #, emit
+    dup $8000 #, and if/  char r #, emit then
+    dup   $01 #, and if/  char n #, emit then
+    dup $4000 #, and if/  char l #, emit then
+    dup   $02 #, and if/  char g #, emit then
+    dup $2000 #, and if/  char c #, emit then
+    dup   $04 #, and if/  char h #, emit then
+    dup $1000 #, and if/  char t #, emit then
+    dup  $800 #, and if/  char s #, emit then
+    drop cr ; 
 
 \ left hand strings
 -create l00 0 ,
@@ -193,7 +228,7 @@ cvariable right
 -create l27 0 , \ asch
 -create l28 2 , char t , char h ,
 -create l29 3 , char a , char t , char h ,
--create l2a 0 ,  \ sth
+-create l2a ," '"  \ sth
 -create l2b 4 , char a , char s , char t , char h ,
 -create l2c 1 , char f ,  \ cth
 -create l2d 2 , char a , char f ,  \ acth
@@ -801,9 +836,7 @@ create right-table
   re8 , re9 , rea , reb , rec , red , ree , ref ,
   rf0 , rf1 , rf2 , rf3 , rf4 , rf5 , rf6 , rf7 ,
   rf8 , rf9 , rfa , rfb , rfc , rfd , rfe , rff ,
-[then]
 
-1 [if]
 : typeHID ( a - )
     p! @p+ 1- -if drop exit then for @p+ emitHIDcaps next ;
 : spaceHID  32 #, emitHID ;
@@ -819,33 +852,40 @@ create right-table
 : (digit) ( n - c)
     $0f #, and $0a #, - -if
         $3a #, + exit then $61 #, + ;
-: write
-    right c@ $c3 #, and if/ true capping c! then
-    *key1? *key2? or if/ backspaceHID exit then
+: backspaces
+    before c@ 0= if/ backspaceHID exit then
+    before c@ begin 
+        $08 #, Keyboard.write 2 #, ms 1- while repeat
+    drop ;
+    
+: write  now c@ before c!  false now c!
+    right c@ $c3 #, = if/ true capping c! then
+    *key1? *key2? or if/ backspaces exit then
     left c@ $f0 #, = if/                       \ OOXX
         right c@ $0f #, and (digit) Emily then \ OOXX
     center c@ 0= if/  \ cr . , ! ?
         left c@ $a0 #, =  right c@ $0a #, = and if/
             crHID exit then
         left c@ $14 #, =  right c@ $14 #, = and if/
-            char . #, emitHID spaceHID +caps exit then
+            char . #, emitHID +caps exit then
         left c@ $28 #, =  right c@ $28 #, = and if/
-            char , #, emitHID spaceHID exit then
+            char , #, emitHID exit then
         left c@ $14 #, =  right c@ $28 #, = and if/
-            char ! #, emitHID spaceHID +caps exit then
+            char ! #, emitHID +caps exit then
         left c@ $28 #, =  right c@ $14 #, = and if/
-            char ? #, emitHID spaceHID +caps exit then
+            char ? #, emitHID +caps exit then
     then \ alphabet tables
     left c@ $5a #, - if/
-        stroke @ $1000200 #, and if/ spaceHID then
+        stroke @ $1000200 #, and 0=
+            left c@ $2a #, - and if/ spaceHID then
         left c@ left-table + @p typeHID
         center c@ center-table + @p typeHID
         right c@ right-table + @p typeHID
-        ekey? if/ char e #, emitHID then
-        ykey? if/ char y #, emitHID then
+        ekey? if/ char e #, emitHIDcaps then
+        ykey? if/ char y #, emitHIDcaps then
         exit
     then \ Emily's symbols
-    right c@ 0= stroke @ $1000200 #, and or if/  \ caps on
+    right c@ 0= stroke @ $1000200 #, and and if/  \ caps on
         true capping c! exit then
     right c@ 0= center c@ $18 #, = and if/  \ space
         spaceHID exit then
@@ -949,15 +989,26 @@ create right-table
         char ~ #, Emily then \ OXX
     false capping c!  \ default
     ;
-: Jackdaw
-    begin scan arrange write cr .s
+: Jackdaw  hex
+    begin
+        scan \ .s cr
+        arrange \ .s cr
+        write \ .s cr
+        \ stroke @ dup u. .s cr
+        \ display .s cr
+        \ space .s cr cr
     again
-[then]
+
+: choose  serial? if/ Gemini send exit then
+    arrange write ;
+: go  begin scan choose again
 
 : init  initMCP23017 initGPIO ;
-turnkey decimal init Keyboard.begin false capping c!
-    ( >hc.) interpret
+turnkey decimal init Keyboard.begin
+    false capping c! false now c!
+\    ( >hc.) interpret
 \    >emit go-Gemini
 \    go-NKRO
 \    Jackdaw
+    >emit go
 
