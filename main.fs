@@ -4,9 +4,9 @@ target
 \ Gemini PR mode
 variable data 4 ramALLOT
 : /data  data a! 5 #, for false c!+ next ; 
-\ : under+ ( n1 n2 n3 - m1+n3 n2)  rot + swap 
+\ : under+ ( n1 n2 n3 - m1+n3 n2)  rot + swap ; 
 \ : #bits ( n1 - n2)  false swap
-\     31 #, for -if 1 #, under+ then 2* next drop 
+\     31 #, for -if 1 #, under+ then 2* next drop ;
 
 : @pins (  - n)  @MCP23017 @GPIO 16 #, lshift or ;
 : press (  - n)  false begin drop @pins until ;
@@ -498,31 +498,31 @@ create left-table
 -create c04  ," a"
 -create c05  ," ia"
 -create c06  ," ea"
--create c07  ," iea"
+-create c07  ," ai" \ swapped
 -create c08  ," o"
 -create c09  ," io"
 -create c0a  ," eo"
--create c0b  ," ieo"
+-create c0b  ," oo" \ plus two opposite
 -create c0c  ," ao"
--create c0d  ," iao"
--create c0e  ," eao"
--create c0f  ," ieao"
+-create c0d  ," oi" \ add a to swap
+-create c0e  ," oa"
+-create c0f  ," ieao" \ ???
 -create c10  ," u"
 -create c11  ," iu"
 -create c12  ," eu"
--create c13  ," ieu"
+-create c13  ," ui"
 -create c14  ," au"
--create c15  ," iau"
--create c16  ," eau"
--create c17  ," ieau"
+-create c15  ," iau" \ hard to stroke
+-create c16  ," eau" \ beautiful
+-create c17  ," ieau" \ very hard to stroke
 -create c18  ," ou"
 -create c19  ," iou"
--create c1a  ," eou"
--create c1b  ," ieou"
+-create c1a  ," ee" \ plus two opposite
+-create c1b  ," ui" \ swapped
 -create c1c  ," aou"
--create c1d  ," iaou"
--create c1e  ," eaou"
--create c1f  ," ieaou"
+-create c1d  ," iaou" \ very hard to stroke
+-create c1e  ," I" \ all but i
+-create c1f  ," ieaou" \ very hard to stroke
 
 create center-table
     c00 , c01 , c02 , c03 , c04 , c05 , c06 , c07 ,
