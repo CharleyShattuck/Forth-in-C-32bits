@@ -510,7 +510,7 @@ create left-table
 -create c10  ," u"
 -create c11  ," iu"
 -create c12  ," eu"
--create c13  ," ui"
+-create c13  ," ei" \ add u to swap
 -create c14  ," au"
 -create c15  ," iau" \ hard to stroke
 -create c16  ," eau" \ beautiful
