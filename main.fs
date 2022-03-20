@@ -506,11 +506,11 @@ create left-table
 -create c0c  ," ao"
 -create c0d  ," oi" \ add a to swap
 -create c0e  ," oa"
--create c0f  ," ieao" \ ???
+-create c0f  ," ei" \ two opposite to swap
 -create c10  ," u"
 -create c11  ," iu"
 -create c12  ," eu"
--create c13  ," ei" \ add u to swap
+-create c13  ," ue" \ add i to swap
 -create c14  ," au"
 -create c15  ," iau" \ hard to stroke
 -create c16  ," eau" \ beautiful
