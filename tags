@@ -798,9 +798,9 @@ Emily	main.fs	+847
 (digit)	main.fs	+852
 backspaces	main.fs	+855
 write	main.fs	+861
-Jackdaw	main.fs	+992
-choose	main.fs	+1002
-go	main.fs	+1004
-init	main.fs	+1006
+Jackdaw	main.fs	+1002
+choose	main.fs	+1012
+go	main.fs	+1014
+init	main.fs	+1016
 .stack	job.fs	+56
 check	job.fs	+57

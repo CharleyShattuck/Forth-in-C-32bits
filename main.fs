@@ -861,8 +861,18 @@ create right-table
 : write  now c@ before c!  false now c!
     right c@ $c3 #, = if/ true capping c! then
     *key1? *key2? or if/ backspaces exit then
-    left c@ $f0 #, = if/                       \ OOXX
-        right c@ $0f #, and (digit) Emily then \ OOXX
+    left c@ $f2 #, = if/
+        right c@ $02 #, and if/ $80 #, keyboard.press then \ control
+        right c@ $08 #, and if/ $82 #, keyboard.press then \ alt
+        right c@ $20 #, and if/ $83 #, keyboard.press then \ super
+        right c@ $80 #, and if/ $81 #, keyboard.press then \ shift
+        exit
+    then
+    left c@ $f0 #, = if/        \ OOXX
+        center c@ $08 #, = if/  \ OOXX  function key
+            right c@ $0f #, and if $c1 #, + emitHID exit then
+            drop exit then
+        right c@ $0f #, and (digit) Emily then \ number
     center c@ 0= if/  \ cr . , ! ?
         left c@ $a0 #, =  right c@ $0a #, = and if/
             crHID exit then
