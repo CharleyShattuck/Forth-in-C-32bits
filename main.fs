@@ -869,8 +869,8 @@ create right-table
     $d7 #, Keyboard.write delay ( Keyboard.releaseAll) ;
 
 : write  now c@ before c!  false now c!
-    right c@ $c3 #, = if/ true capping c! false spacing c! then \ XOOX
-    *key1? *key2? or if/ backspaces exit then                   \ XOOX
+    right c@ $8c #, = if/ true capping c! false spacing c! then \ OXOO
+    *key1? *key2? or if/ backspaces exit then                   \ OXOX 
     left c@ $98 #, = if/ \ modifiers                  \ OOXO 
         right c@ 0= if/ Keyboard.releaseAll exit then \ OXOX
         right c@ $02 #, and if/ $80 #, keyboard.press then \ control
@@ -891,11 +891,10 @@ create right-table
         right c@ $26 #, = if/ $d3 #, emitHID exit then \ page up
         right c@ $19 #, = if/ $d6 #, emitHID exit then \ page down
     then
-    left c@ $f0 #, = if/ \ numbers \ OOXX
-        center c@ $08 #, = if/     \ OOXX  function key
-            right c@ $0f #, and if $c1 #, + emitHID exit then
-            drop exit then
-        right c@ $0f #, and (digit) Emily then \ number
+    \ OOXX          OOXX
+    \ OOXX number   XOXX function key
+    left c@ $f0 #, = if/ right c@ $0f #, and (digit) Emily then
+    left c@ $f2 #, = if/ right c@ $0f #, and $c1 #, + emitHID exit then
     center c@ 0= if/  \ cr . , ! ?  common punctuation
         left c@ $a0 #, =  right c@ $0a #, = and if/
             crHID exit then
@@ -910,7 +909,8 @@ create right-table
     then \ alphabet tables
     left c@ $5a #, - if/
         stroke @ $1000200 #, and 0= \ asterisk keys suppress space
-            left c@ $2a #, - and if/ spaceHID then
+            left c@ $2a #, - and 0= 0=  right c@ $8c #, - and
+                if/ spaceHID then
         left c@ left-table + @p typeHID
         center c@ center-table + @p typeHID
         right c@ right-table + @p typeHID
