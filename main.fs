@@ -52,15 +52,20 @@ variable 'spit
 cvariable capping
 : +caps  true capping c! ;
 : -caps  false capping c! ;
+cvariable spacing
+: +space  true spacing c! ;
+: -space  false spacing c! ;
+
+: delay  2 #, ms ;
 
 cvariable now
 cvariable before
 : +now  now c@ 1+ now c! ;
 : emitHIDcaps ( c)  +now
-    capping c@ if/ ( shift) $81 #, Keyboard.press -caps 2 #, ms then
-    Keyboard.press 2 #, ms
-    Keyboard.releaseAll 2 #, ms ; 
-: emitHID  +now Keyboard.write 2 #, ms ;
+    capping c@ if/ ( shift) $81 #, Keyboard.press -caps delay then
+    Keyboard.press delay
+    Keyboard.releaseAll delay ; 
+: emitHID  +now Keyboard.write delay ;
 
 : navigate  $86 #, Keyboard.press $b3 a #, emitHID
     begin scan $20 #, = while/ $b3 #, emitHID repeat
@@ -855,25 +860,43 @@ create right-table
 : backspaces
     before c@ 0= if/ backspaceHID exit then
     before c@ begin 
-        $08 #, Keyboard.write 2 #, ms 1- while repeat
+        $08 #, Keyboard.write delay 1- while repeat
     drop ;
-    
+
+: word-left  $80 #, Keyboard.press delay
+    $d8 #, Keyboard.write delay ( Keyboard.releaseAll) ;
+: word-right  $80 #, Keyboard.press delay
+    $d7 #, Keyboard.write delay ( Keyboard.releaseAll) ;
+
 : write  now c@ before c!  false now c!
-    right c@ $c3 #, = if/ true capping c! then
-    *key1? *key2? or if/ backspaces exit then
-    left c@ $f2 #, = if/
+    right c@ $c3 #, = if/ true capping c! false spacing c! then \ XOOX
+    *key1? *key2? or if/ backspaces exit then                   \ XOOX
+    left c@ $98 #, = if/ \ modifiers                  \ OOXO 
+        right c@ 0= if/ Keyboard.releaseAll exit then \ OXOX
         right c@ $02 #, and if/ $80 #, keyboard.press then \ control
         right c@ $08 #, and if/ $82 #, keyboard.press then \ alt
         right c@ $20 #, and if/ $83 #, keyboard.press then \ super
         right c@ $80 #, and if/ $81 #, keyboard.press then \ shift
         exit
+    then                 \ OOOO
+    left c@ $aa #, = if/ \ XXXX  movement
+        right c@ $04 #, = if/ $da #, emitHID exit then \ up
+        right c@ $08 #, = if/ $d9 #, emitHID exit then \ down
+        right c@ $02 #, = if/ $d8 #, emitHID exit then \ left
+        right c@ $20 #, = if/ $d7 #, emitHID exit then \ right
+        right c@ $0a #, = if/ word-left  exit then \ word left
+        right c@ $28 #, = if/ word-right exit then \ word right
+        right c@ $15 #, = if/ $d2 #, emitHID exit then \ beginning of line
+        right c@ $2a #, = if/ $d5 #, emitHID exit then \ end of line
+        right c@ $26 #, = if/ $d3 #, emitHID exit then \ page up
+        right c@ $19 #, = if/ $d6 #, emitHID exit then \ page down
     then
-    left c@ $f0 #, = if/        \ OOXX
-        center c@ $08 #, = if/  \ OOXX  function key
+    left c@ $f0 #, = if/ \ numbers \ OOXX
+        center c@ $08 #, = if/     \ OOXX  function key
             right c@ $0f #, and if $c1 #, + emitHID exit then
             drop exit then
         right c@ $0f #, and (digit) Emily then \ number
-    center c@ 0= if/  \ cr . , ! ?
+    center c@ 0= if/  \ cr . , ! ?  common punctuation
         left c@ $a0 #, =  right c@ $0a #, = and if/
             crHID exit then
         left c@ $14 #, =  right c@ $14 #, = and if/
@@ -886,7 +909,7 @@ create right-table
             char ? #, emitHID +caps exit then
     then \ alphabet tables
     left c@ $5a #, - if/
-        stroke @ $1000200 #, and 0=
+        stroke @ $1000200 #, and 0= \ asterisk keys suppress space
             left c@ $2a #, - and if/ spaceHID then
         left c@ left-table + @p typeHID
         center c@ center-table + @p typeHID
@@ -897,37 +920,13 @@ create right-table
     then \ Emily's symbols
     right c@ 0= stroke @ $1000200 #, and and if/  \ caps on
         true capping c! exit then
-    right c@ 0= center c@ $18 #, = and if/  \ space
-        spaceHID exit then
+    right c@ 0= center c@ $18 #, = and if/ spaceHID exit then \ space
     right c@ $21 #, = if/ \ XOO
-        center c@ 0= if/  \ 00X \ tab
-            $b3 #, Emily then
-        center c@ $08 #, = if/  \ backspace
-            $b2 #, Emily then
-        center c@ $10 #, = if/  \ delete
-            $d4 #, Emily then
-        center c@ $18 #, = if/  \ escape
-            $b1 #, Emily then
-    then
-    right c@ $2e #, = if/ \ 0XO
-        center c@ 0= if/  \ XXX \ up
-            $da #, Emily then
-        center c@ $08 #, = if/  \ left
-            $d8 #, Emily then
-        center c@ $10 #, = if/  \ right
-            $d7 #, Emily then
-        center c@ $18 #, = if/  \ down
-            $d9 #, Emily then
-    then
-    right c@ $2f #, = if/ \ XXO
-        center c@ 0= if/  \ XXX \ page up
-            $d3 #, Emily then
-        center c@ $08 #, = if/  \ home
-            $d2 #, Emily then
-        center c@ $10 #, = if/  \ end
-            $d5 #, Emily then
-        center c@ $18 #, = if/  \ page down
-            $d6 #, Emily then
+                          \ OOX
+        center c@ 0=       if/ $b3 #, Emily then \ tab
+        center c@ $08 #, = if/ $b2 #, Emily then \ backspace
+        center c@ $10 #, = if/ $d4 #, Emily then \ delete
+        center c@ $18 #, = if/ $b1 #, Emily then \ escape
     then
     right c@ $03 #, = if/    \ XOO
         char ! #, Emily then \ XOO
