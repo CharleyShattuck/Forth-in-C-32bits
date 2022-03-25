@@ -870,7 +870,19 @@ create right-table
 
 : write  now c@ before c!  false now c!
     right c@ $8c #, = if/ true capping c! false spacing c! then \ OXOO
-    *key1? *key2? or if/ backspaces exit then                   \ OXOX 
+    *key1? *key2? or if/ backspaces exit then                   \ OXOX
+    left c@ 0= if/  \ endings
+         center c@ 0= if/
+             right c@ $06 #, = if/ char s #, emitHID exit then
+             right c@ $0e #, = if/
+                char e #, emitHID char d #, emitHID exit then
+             right c@ $0a #, = if/
+                char i #, emitHID  char n #, emitHID
+                char g #, emitHID  exit then
+             right c@ $86 #, = if/
+                char e #, emitHID  char s #, emitHID exit then
+        then
+    then
     left c@ $98 #, = if/ \ modifiers                  \ OOXO 
         right c@ 0= if/ Keyboard.releaseAll exit then \ OXOX
         right c@ $02 #, and if/ $80 #, keyboard.press then \ control

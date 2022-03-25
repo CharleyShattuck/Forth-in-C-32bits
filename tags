@@ -804,9 +804,9 @@ backspaces	main.fs	+860
 word-left	main.fs	+866
 word-right	main.fs	+868
 write	main.fs	+871
-Jackdaw	main.fs	+1001
-choose	main.fs	+1011
-go	main.fs	+1013
-init	main.fs	+1015
+Jackdaw	main.fs	+1013
+choose	main.fs	+1023
+go	main.fs	+1025
+init	main.fs	+1027
 .stack	job.fs	+56
 check	job.fs	+57
