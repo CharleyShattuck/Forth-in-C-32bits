@@ -87,6 +87,7 @@ cvariable former
 : send-NKRO ( n - )
     false former c!
     dup  $100000 #, and if/ [ char q ] #, spew then
+             right c@ $06 #, = if/ char s #, emitHID exit then
     dup  $200000 #, and if/ [ char w ] #, spew then
     dup  $400000 #, and if/ [ char e ] #, spew then
     dup  $800000 #, and if/ [ char r ] #, spew then
@@ -301,7 +302,7 @@ cvariable right
 -create l67 0 ,  \ aschn
 -create l68 2 , char t , char y ,  \ thn
 -create l69 0 ,  \ athn
--create l6a 2 , char s , char t , char y ,  \ sthn
+-create l6a 3 , char s , char t , char y ,  \ sthn
 -create l6b 0 ,  \ asthn
 -create l6c 2 , char d , char y ,  \ cthn
 -create l6d 3 , char a , char f , char f ,  \ acthn
@@ -519,13 +520,13 @@ create left-table
 -create c14  ," au"
 -create c15  ," iau" \ hard to stroke
 -create c16  ," eau" \ beautiful
--create c17  ," ieau" \ very hard to stroke
+-create c17  ," ua" \ very hard to stroke
 -create c18  ," ou"
 -create c19  ," iou"
 -create c1a  ," ee" \ plus two opposite
 -create c1b  ," ui" \ swapped
--create c1c  ," aou"
--create c1d  ," iaou" \ very hard to stroke
+-create c1c  ," oe"
+-create c1d  ," uo" \ very hard to stroke
 -create c1e  ," I" \ all but i
 -create c1f  ," ieaou" \ very hard to stroke
 
@@ -873,7 +874,8 @@ create right-table
     *key1? *key2? or if/ backspaces exit then                   \ OXOX
     left c@ 0= if/  \ endings
          center c@ 0= if/
-             right c@ $06 #, = if/ char s #, emitHID exit then
+             right c@ $06 #, =  right c@ $80 #, = or if/
+                char s #, emitHID exit then
              right c@ $0e #, = if/
                 char e #, emitHID char d #, emitHID exit then
              right c@ $0a #, = if/
@@ -883,8 +885,8 @@ create right-table
                 char e #, emitHID  char s #, emitHID exit then
         then
     then
-    left c@ $98 #, = if/ \ modifiers                  \ OOXO 
-        right c@ 0= if/ Keyboard.releaseAll exit then \ OXOX
+    left c@ $96 #, = if/ \ modifiers                  \ OXXO 
+        right c@ 0= if/ Keyboard.releaseAll exit then \ XOOX
         right c@ $02 #, and if/ $80 #, keyboard.press then \ control
         right c@ $08 #, and if/ $82 #, keyboard.press then \ alt
         right c@ $20 #, and if/ $83 #, keyboard.press then \ super
