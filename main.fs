@@ -603,7 +603,7 @@ create center-table
 -create r3c ," lf"
 -create r3d 0 ,
 -create r3e ," mp"
--create r3f 0 ,
+-create r3f ," rd" \ CWS 3/29/20
 
 -create r40 ," t"
 -create r41 ," rt"
