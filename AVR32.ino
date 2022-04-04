@@ -414,8 +414,10 @@ void _nip(){
 }
 
 void _initMCP23017(){
+    int a = T;
+    DROP;
     Wire.begin();
-    Wire.beginTransmission(0x20);
+    Wire.beginTransmission(a);
     Wire.write(0x0c); // GPPUA
     Wire.write(0xff);
     Wire.write(0xff);
@@ -424,11 +426,12 @@ void _initMCP23017(){
 
 // only one port expander in the system
 void _fetchMCP23017(){
-    DUP;
-    Wire.beginTransmission(0x20);
+    int a = T;
+//    DUP;
+    Wire.beginTransmission(a);
     Wire.write(0x12); // GPIOA
     Wire.endTransmission();
-    Wire.requestFrom(0x20, 2);
+    Wire.requestFrom(a, 2);
     T=Wire.read();
     W=Wire.read();
     T|=W<<8;

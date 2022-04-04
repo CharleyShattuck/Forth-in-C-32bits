@@ -8,7 +8,7 @@ variable data 4 ramALLOT
 \ : #bits ( n1 - n2)  false swap
 \     31 #, for -if 1 #, under+ then 2* next drop ;
 
-: @pins (  - n)  @MCP23017 @GPIO 16 #, lshift or ;
+: @pins (  - n)  $20 #, @MCP23017 @GPIO 16 #, lshift or ;
 : press (  - n)  false begin drop @pins until ;
 : release ( n1 - n2)  begin @pins while or repeat drop ;
 : scan (  - n)
@@ -865,9 +865,9 @@ create right-table
     drop ;
 
 : word-left  $80 #, Keyboard.press delay
-    $d8 #, Keyboard.write delay ( Keyboard.releaseAll) ;
+    $d8 #, Keyboard.write delay Keyboard.releaseAll ;
 : word-right  $80 #, Keyboard.press delay
-    $d7 #, Keyboard.write delay ( Keyboard.releaseAll) ;
+    $d7 #, Keyboard.write delay Keyboard.releaseAll ;
 
 : write  now c@ before c!  false now c!
     right c@ $8c #, = if/ true capping c! false spacing c! then \ OXOO
@@ -1026,7 +1026,7 @@ create right-table
     arrange write ;
 : go  begin scan choose again
 
-: init  initMCP23017 initGPIO ;
+: init  $20 #, initMCP23017 initGPIO ;
 turnkey decimal init Keyboard.begin
     false capping c! false now c!
 \    ( >hc.) interpret
