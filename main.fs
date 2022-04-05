@@ -1,14 +1,30 @@
 \ main.fs
+
+\ split keyboard or one piece?
+[  true constant TinyMod? ]
+[ false constant split? ]
+  split? [if] .( split TinyMod)     [then]
+TinyMod? [if] .( one piece TinyMod) [then]
+cr
+
 target
 
 \ Gemini PR mode
-variable data 4 ramALLOT
+variable data 4 ramALLOT \ 6 bytes in all
 : /data  data a! 5 #, for false c!+ next ; 
-\ : under+ ( n1 n2 n3 - m1+n3 n2)  rot + swap ; 
-\ : #bits ( n1 - n2)  false swap
-\     31 #, for -if 1 #, under+ then 2* next drop ;
 
-: @pins (  - n)  $20 #, @MCP23017 @GPIO 16 #, lshift or ;
+split? [if]
+: initPortExpander
+    $20 #, initMCP23017  $22 #, initMCP23017 ;
+: @pins (  - n)
+    $20 #, @MCP23017  $22 #, @MCP23017  16 #, lshift or ;
+[then]
+TinyMod? [if]
+: initPortExpander  $20 #, initMCP23017 ;
+: @pins (  - n)
+    $20 #, @MCP23017 @GPIO 16 #, lshift or ;
+[then]
+
 : press (  - n)  false begin drop @pins until ;
 : release ( n1 - n2)  begin @pins while or repeat drop ;
 : scan (  - n)
@@ -58,23 +74,25 @@ cvariable spacing
 
 : delay  2 #, ms ;
 
+\ for backspacing with asterisk key
 cvariable now
 cvariable before
 : +now  now c@ 1+ now c! ;
+
 : emitHIDcaps ( c)  +now
     capping c@ if/ ( shift) $81 #, Keyboard.press -caps delay then
     Keyboard.press delay
     Keyboard.releaseAll delay ; 
 : emitHID  +now Keyboard.write delay ;
 
-: navigate  $86 #, Keyboard.press $b3 a #, emitHID
-    begin scan $20 #, = while/ $b3 #, emitHID repeat
-    Keyboard.releaseAll ;
-: go-Gemini ( n - n)
-    begin
-        begin scan $1000220 #, - while $1000220 #, + Gemini send repeat
-        drop navigate
-    again
+\ : navigate  $86 #, Keyboard.press $b3 a #, emitHID
+\    begin scan $20 #, = while/ $b3 #, emitHID repeat
+\    Keyboard.releaseAll ;
+\ : go-Gemini ( n - n)
+\    begin
+\        begin scan $1000220 #, - while $1000220 #, + Gemini send repeat
+\        drop navigate
+\    again
 
 0 [if]
 \ NKRO keyboard mode
@@ -201,28 +219,28 @@ cvariable right
 -create l08 ," t"
 -create l09 ," at"
 -create l0a ," st"
--create l0b ," ad"
+-create l0b ," ast"
 -create l0c ," d"
--create l0d ," ast"
+-create l0d ," ad"
 -create l0e ," g"
 -create l0f ," ag"
 
--create l10 1 , char w , 
--create l11 2 , char a , char w , 
--create l12 2 , char s , char w , 
+-create l10 ," w" \ 1 , char w , 
+-create l11 ," aw" \ 2 , char a , char w , 
+-create l12 ," sw" \ 2 , char s , char w , 
 -create l13 0 ,  \ asw
--create l14 1 , char p , 
--create l15 2 , char a , char p , 
--create l16 2 , char s , char p , 
--create l17 3 , char a , char s , char s ,  \ ascn 
--create l18 2 , char t , char w , 
--create l19 3 , char a , char t ,  char t ,  \ atw
--create l1a 1 , char x ,  \ stw
--create l1b 2 , char a , char x , 
--create l1c 2 , char d , char w ,  \ ctw
--create l1d 3 , char a , char d , char d ,  \ actw 
--create l1e 2 , char g , char w ,  \ sctw
--create l1f 3 , char a , char g , char g ,  \ asctw
+-create l14 ," p" \ 1 , char p , 
+-create l15 ," ap" \ 2 , char a , char p , 
+-create l16 ," sp" \ 2 , char s , char p , 
+-create l17 ," ass" \ 3 , char a , char s , char s ,  \ ascn 
+-create l18 ," tw" \ 2 , char t , char w , 
+-create l19 ," att" \ 3 , char a , char t ,  char t ,  \ atw
+-create l1a ," x" \ 1 , char x ,  \ stw
+-create l1b ," ax" \ 2 , char a , char x , 
+-create l1c ," dw" \ 2 , char d , char w ,  \ ctw
+-create l1d ," add" \ 3 , char a , char d , char d ,  \ actw 
+-create l1e ," gw" \ 2 , char g , char w ,  \ sctw
+-create l1f ," agg" \ 3 , char a , char g , char g ,  \ asctw
 
 -create l20 1 , char h ,
 -create l21 2 , char a , char h ,
@@ -1022,14 +1040,14 @@ create right-table
         \ space .s cr cr
     again
 
-: choose  serial? if/ Gemini send exit then
+: choose  \ serial? if/ Gemini send exit then
     arrange write ;
 : go  begin scan choose again
 
-: init  $20 #, initMCP23017 initGPIO ;
+: init  initPortExpander  initGPIO ;
 turnkey decimal init Keyboard.begin
     false capping c! false now c!
-\    ( >hc.) interpret
+\    >hc. interpret
 \    >emit go-Gemini
 \    go-NKRO
 \    Jackdaw
