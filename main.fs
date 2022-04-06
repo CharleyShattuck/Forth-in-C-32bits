@@ -888,8 +888,8 @@ create right-table
     $d7 #, Keyboard.write delay Keyboard.releaseAll ;
 
 : write  now c@ before c!  false now c!
-    right c@ $8c #, = if/ true capping c! false spacing c! then \ OXOO
-    *key1? *key2? or if/ backspaces exit then                   \ OXOX
+    right c@ $8c #, = if/ +caps -space then   \ OXOO
+    *key1? *key2? or if/ backspaces exit then \ OXOX
     left c@ 0= if/  \ endings
          center c@ 0= if/
              right c@ $06 #, =  right c@ $80 #, = or if/
@@ -903,8 +903,8 @@ create right-table
                 char e #, emitHID  char s #, emitHID exit then
         then
     then
-    left c@ $96 #, = if/ \ modifiers                  \ OXXO 
-        right c@ 0= if/ Keyboard.releaseAll exit then \ XOOX
+    left c@ $b0 #, = if/ \ modifiers                  \ OOXO 
+        right c@ 0= if/ Keyboard.releaseAll exit then \ OOXX
         right c@ $02 #, and if/ $80 #, keyboard.press then \ control
         right c@ $08 #, and if/ $82 #, keyboard.press then \ alt
         right c@ $20 #, and if/ $83 #, keyboard.press then \ super
@@ -928,8 +928,10 @@ create right-table
     left c@ $f0 #, = if/ right c@ $0f #, and (digit) Emily then
     left c@ $f2 #, = if/ right c@ $0f #, and $c1 #, + emitHID exit then
     center c@ 0= if/  \ cr . , ! ?  common punctuation
-        left c@ $a0 #, =  right c@ $0a #, = and if/
+        left c@ $a0 #, =  right c@ $0a #, = and if/ \ rh-ng
             crHID exit then
+        left c@ $80 #, =  right c@ $08 #, = and if/ \ r-n
+            crHID +caps exit then
         left c@ $14 #, =  right c@ $14 #, = and if/
             char . #, emitHID +caps exit then
         left c@ $28 #, =  right c@ $28 #, = and if/
@@ -1040,7 +1042,7 @@ create right-table
         \ space .s cr cr
     again
 
-: choose  \ serial? if/ Gemini send exit then
+: choose  7 #, @pin if/ Gemini send exit then
     arrange write ;
 : go  begin scan choose again
 

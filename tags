@@ -116,7 +116,7 @@ Keyboard.release	core.fs	+105
 Keyboard.releaseAll	core.fs	+106
 /branch	core.fs	+108
 Keyboard.write	core.fs	+109
-serial?	core.fs	+110
+@pin	core.fs	+110
 begin	core.fs	+112
 again	core.fs	+113
 until	core.fs	+115
@@ -805,9 +805,9 @@ backspaces	main.fs	+879
 word-left	main.fs	+885
 word-right	main.fs	+887
 write	main.fs	+890
-Jackdaw	main.fs	+1033
-choose	main.fs	+1043
-go	main.fs	+1045
-init	main.fs	+1047
+Jackdaw	main.fs	+1035
+choose	main.fs	+1045
+go	main.fs	+1047
+init	main.fs	+1049
 .stack	job.fs	+56
 check	job.fs	+57

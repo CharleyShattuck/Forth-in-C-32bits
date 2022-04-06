@@ -107,7 +107,7 @@ code Keyboard.releaseAll  70 ,
 \ code Keyboard.end  71 ,
 -code /branch  72 ,
 code Keyboard.write 73 ,
-code serial? 74 ,
+code @pin 74 ,
 
 :m begin (  - a)  here m;
 :m again ( a)  branch [ 2/ ] , m;
