@@ -864,7 +864,7 @@ create right-table
 : typeHID ( a - )
     p! @p+ 1- -if drop exit then for @p+ emitHIDcaps next ;
 : spaceHID  32 #, emitHID ;
-: crHID  13 #, emitHID  10 #, emitHID ;
+: crHID  13 #, emitHID  10 #, emitHID -space ;
 : escapeHID  $b1 #, emitHID ;
 : backspaceHID  $08 #, emitHID ;
 : right-thumb ( c -  flag)  center c@ $18 #, and = ;
@@ -930,7 +930,7 @@ create right-table
     center c@ 0= if/  \ cr . , ! ?  common punctuation
         left c@ $a0 #, =  right c@ $0a #, = and if/ \ rh-ng
             crHID exit then
-        left c@ $80 #, =  right c@ $08 #, = and if/ \ r-n
+        left c@ $80 #, =  right c@ $02 #, = and if/ \ r-n
             crHID +caps exit then
         left c@ $14 #, =  right c@ $14 #, = and if/
             char . #, emitHID +caps exit then
@@ -943,8 +943,8 @@ create right-table
     then \ alphabet tables
     left c@ $5a #, - if/
         stroke @ $1000200 #, and 0= \ asterisk keys suppress space
-            left c@ $2a #, - and 0= 0=  right c@ $8c #, - and
-                if/ spaceHID then
+            left c@ $2a #, - 0= 0= and  right c@ $8c #, - 0= 0= and
+            spacing c@ 0= 0= and if/ spaceHID then +space
         left c@ left-table + @p typeHID
         center c@ center-table + @p typeHID
         right c@ right-table + @p typeHID
@@ -952,9 +952,10 @@ create right-table
         ykey? if/ char y #, emitHIDcaps then
         exit
     then \ Emily's symbols
-    right c@ 0= stroke @ $1000200 #, and and if/  \ caps on
-        true capping c! exit then
+    right c@ 0= stroke @ $1000200 #, and and left c@ 0= or if/  \ caps on
+        true capping c! -space exit then
     right c@ 0= center c@ $18 #, = and if/ spaceHID exit then \ space
+    right c@ 0=  center c@ 0= and if/ -space -caps exit then \ caps and space off
     right c@ $21 #, = if/ \ XOO
                           \ OOX
         center c@ 0=       if/ $b3 #, Emily then \ tab
@@ -1048,7 +1049,7 @@ create right-table
 
 : init  initPortExpander  initGPIO ;
 turnkey decimal init Keyboard.begin
-    false capping c! false now c!
+    -caps false now c! +space
 \    >hc. interpret
 \    >emit go-Gemini
 \    go-NKRO
