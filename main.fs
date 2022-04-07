@@ -94,7 +94,6 @@ cvariable before
 \        drop navigate
 \    again
 
-0 [if]
 \ NKRO keyboard mode
 cvariable former
 : spew ( c - )
@@ -105,7 +104,7 @@ cvariable former
 : send-NKRO ( n - )
     false former c!
     dup  $100000 #, and if/ [ char q ] #, spew then
-             right c@ $06 #, = if/ char s #, emitHID exit then
+\             right c@ $06 #, = if/ char s #, emitHID exit then
     dup  $200000 #, and if/ [ char w ] #, spew then
     dup  $400000 #, and if/ [ char e ] #, spew then
     dup  $800000 #, and if/ [ char r ] #, spew then
@@ -137,7 +136,6 @@ cvariable former
     drop Keyboard.releaseAll ; 
 : go-NKRO
     begin scan send-NKRO again
-[then]
 
 \ Jackdaw mode
 variable stroke \ remember the last stroke
@@ -179,6 +177,7 @@ cvariable right
     dup $80 #, and if/ $10 #, !center then \ u
     drop ; 
 
+0 [if]
 : display ( n - )
     dup $100000 #, and if/  char a #, emit then
     dup  $80000 #, and if/  char s #, emit then
@@ -206,6 +205,7 @@ cvariable right
     dup $1000 #, and if/  char t #, emit then
     dup  $800 #, and if/  char s #, emit then
     drop cr ; 
+[then]
 
 \ left hand strings
 -create l00 0 ,
@@ -888,8 +888,8 @@ create right-table
     $d7 #, Keyboard.write delay Keyboard.releaseAll ;
 
 : write  now c@ before c!  false now c!
-    right c@ $8c #, = if/ +caps -space then   \ OXOO
-    *key1? *key2? or if/ backspaces exit then \ OXOX
+    right c@ $8c #, = if/ +caps -space then
+    *key1? *key2? or if/ backspaces exit then
     left c@ 0= if/  \ endings
          center c@ 0= if/
              right c@ $06 #, =  right c@ $80 #, = or if/
@@ -953,7 +953,8 @@ create right-table
         exit
     then \ Emily's symbols
     right c@ 0= stroke @ $1000200 #, and and left c@ 0= or if/  \ caps on
-        true capping c! -space exit then
+        +caps center c@ if/ +space exit then -space exit
+    then
     right c@ 0= center c@ $18 #, = and if/ spaceHID exit then \ space
     right c@ 0=  center c@ 0= and if/ -space -caps exit then \ caps and space off
     right c@ $21 #, = if/ \ XOO
