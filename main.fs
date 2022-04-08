@@ -1,29 +1,24 @@
 \ main.fs
 
-\ split keyboard or one piece?
-[  true constant TinyMod? ]
-[ false constant split? ]
-  split? [if] .( split TinyMod)     [then]
-TinyMod? [if] .( one piece TinyMod) [then]
-cr
-
 target
 
 \ Gemini PR mode
 variable data 4 ramALLOT \ 6 bytes in all
 : /data  data a! 5 #, for false c!+ next ; 
 
-split? [if]
-: initPortExpander
-    $20 #, initMCP23017  $22 #, initMCP23017 ;
-: @pins (  - n)
-    $20 #, @MCP23017  $22 #, @MCP23017  16 #, lshift or ;
-[then]
-TinyMod? [if]
 : initPortExpander  $20 #, initMCP23017 ;
 : @pins (  - n)
-    $20 #, @MCP23017 @GPIO 16 #, lshift or ;
-[then]
+    $20 #, @MCP23017  0 #, 
+     9 #, @pin  $010000 #, and or
+    10 #, @pin  $020000 #, and or
+    11 #, @pin  $040000 #, and or
+    12 #, @pin  $080000 #, and or
+    19 #, @pin  $100000 #, and or
+    20 #, @pin  $200000 #, and or
+    21 #, @pin  $400000 #, and or
+    22 #, @pin  $800000 #, and or
+    23 #, @pin $1000000 #, and or
+    or $1ff0000 #, xor ;
 
 : press (  - n)  false begin drop @pins until ;
 : release ( n1 - n2)  begin @pins while or repeat drop ;

@@ -427,7 +427,6 @@ void _initMCP23017(){
 // only one port expander in the system
 void _fetchMCP23017(){
     int a = T;
-//    DUP;
     Wire.beginTransmission(a);
     Wire.write(0x12); // GPIOA
     Wire.endTransmission();
