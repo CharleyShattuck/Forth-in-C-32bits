@@ -2,11 +2,12 @@
 
 target
 
-\ Gemini PR mode
+\ serial modes
 variable data 4 ramALLOT \ 6 bytes in all
 : /data  data a! 5 #, for false c!+ next ; 
 
 : initPortExpander  $20 #, initMCP23017 ;
+\ : initPins  ;
 : @pins (  - n)
     $20 #, @MCP23017  0 #, 
      9 #, @pin  $010000 #, and or
@@ -80,15 +81,6 @@ cvariable before
     Keyboard.releaseAll delay ; 
 : emitHID  +now Keyboard.write delay ;
 
-\ : navigate  $86 #, Keyboard.press $b3 a #, emitHID
-\    begin scan $20 #, = while/ $b3 #, emitHID repeat
-\    Keyboard.releaseAll ;
-\ : go-Gemini ( n - n)
-\    begin
-\        begin scan $1000220 #, - while $1000220 #, + Gemini send repeat
-\        drop navigate
-\    again
-
 \ NKRO keyboard mode
 cvariable former
 : spew ( c - )
@@ -99,7 +91,6 @@ cvariable former
 : send-NKRO ( n - )
     false former c!
     dup  $100000 #, and if/ [ char q ] #, spew then
-\             right c@ $06 #, = if/ char s #, emitHID exit then
     dup  $200000 #, and if/ [ char w ] #, spew then
     dup  $400000 #, and if/ [ char e ] #, spew then
     dup  $800000 #, and if/ [ char r ] #, spew then
@@ -129,8 +120,8 @@ cvariable former
     dup $40 #, and if/ [ char n ] #, spew then
     dup $80 #, and if/ [ char m ] #, spew then
     drop Keyboard.releaseAll ; 
-: go-NKRO
-    begin scan send-NKRO again
+\ : go-NKRO
+\     begin scan send-NKRO again
 
 \ Jackdaw mode
 variable stroke \ remember the last stroke
@@ -172,7 +163,7 @@ cvariable right
     dup $80 #, and if/ $10 #, !center then \ u
     drop ; 
 
-0 [if]
+0 [if] \ used to debug
 : display ( n - )
     dup $100000 #, and if/  char a #, emit then
     dup  $80000 #, and if/  char s #, emit then
@@ -220,90 +211,90 @@ cvariable right
 -create l0e ," g"
 -create l0f ," ag"
 
--create l10 ," w" \ 1 , char w , 
--create l11 ," aw" \ 2 , char a , char w , 
--create l12 ," sw" \ 2 , char s , char w , 
+-create l10 ," w"
+-create l11 ," aw"
+-create l12 ," sw"
 -create l13 0 ,  \ asw
--create l14 ," p" \ 1 , char p , 
--create l15 ," ap" \ 2 , char a , char p , 
--create l16 ," sp" \ 2 , char s , char p , 
--create l17 ," ass" \ 3 , char a , char s , char s ,  \ ascn 
--create l18 ," tw" \ 2 , char t , char w , 
--create l19 ," att" \ 3 , char a , char t ,  char t ,  \ atw
--create l1a ," x" \ 1 , char x ,  \ stw
--create l1b ," ax" \ 2 , char a , char x , 
--create l1c ," dw" \ 2 , char d , char w ,  \ ctw
--create l1d ," add" \ 3 , char a , char d , char d ,  \ actw 
--create l1e ," gw" \ 2 , char g , char w ,  \ sctw
--create l1f ," agg" \ 3 , char a , char g , char g ,  \ asctw
+-create l14 ," p"
+-create l15 ," ap"
+-create l16 ," sp"
+-create l17 ," ass"
+-create l18 ," tw"
+-create l19 ," att"
+-create l1a ," x"
+-create l1b ," ax"
+-create l1c ," dw"
+-create l1d ," add"
+-create l1e ," gw"
+-create l1f ," agg"
 
--create l20 1 , char h ,
--create l21 2 , char a , char h ,
--create l22 2 , char s , char h ,
--create l23 3 , char a , char s , char h ,
--create l24 2 , char c , char h ,
--create l25 3 , char a , char c , char h ,
--create l26 3 , char s , char c , char h ,
+-create l20 ," h"
+-create l21 ," ah"
+-create l22 ," sh"
+-create l23 ," ash"
+-create l24 ," ch"
+-create l25 ," ach"
+-create l26 ," sch"
 -create l27 0 , \ asch
--create l28 2 , char t , char h ,
--create l29 3 , char a , char t , char h ,
+-create l28 ," th"
+-create l29 ," ath"
 -create l2a ," '"  \ sth
--create l2b 4 , char a , char s , char t , char h ,
--create l2c 1 , char f ,  \ cth
--create l2d 2 , char a , char f ,  \ acth
--create l2e 2 , char g , char h ,  \ scth
--create l2f 3 , char a , char g , char h ,  \ ascth
+-create l2b ," asth"
+-create l2c ," f"
+-create l2d ," af"
+-create l2e ," gh"
+-create l2f ," agh"
 
--create l30 2 , char w , char h ,
--create l31 3 , char a , char w , char h ,
+-create l30 ," wh"
+-create l31 ," awh"
 -create l32 0 ,  \ swh
 -create l33 0 ,  \ aswh
--create l34 2 , char p , char h ,  \ cwh
--create l35 3 , char a , char p , char h ,  \ acwh
--create l36 3 , char s , char p , char h ,  \ scwh
--create l37 4 , char a , char s , char p , char h ,  \ ascwh
--create l38 1 , char k ,  \ twh
--create l39 2 , char a , char k ,  \ atwh
--create l3a 2 , char s , char k ,  \ stwh
--create l3b 3 , char a , char s , char k ,  \ astwh
--create l3c 1 , char b ,  \ ctwh
--create l3d 2 , char a , char b ,  \ actwh
+-create l34 ," ph"
+-create l35 ," aph"
+-create l36 ," sph"
+-create l37 ," asph"
+-create l38 ," k"
+-create l39 ," ak"
+-create l3a ," sk"
+-create l3b ," ask"
+-create l3c ," b"
+-create l3d ," ab"
 -create l3e 0 ,  \ sctwh
--create l3f 3 , char a , char b , char b ,  \ asctwh
+-create l3f ," abb"
 
--create l40 1 , char n ,
--create l41 2 , char a , char n ,
--create l42 2 , char s , char n ,
--create l43 3 , char a , char n , char n ,  \ asn
--create l44 1 , char z ,  \ cn
--create l45 2 , char a , char z ,  \ acn
--create l46 2 , char s , char s ,  \ scn
--create l47 3 , char a , char s , char s ,  \ ascn
--create l48 1 , char v ,  \ tn
--create l49 2 , char a , char v ,  \ atn
--create l4a 2 , char s , char v ,  \ stn
+-create l40 ," n"
+-create l41 ," an"
+-create l42 ," sn"
+-create l43 ," ann"
+-create l44 ," z"
+-create l45 ," az"
+-create l46 ," ss"
+-create l47 ," ass"
+-create l48 ," v"
+-create l49 ," av"
+-create l4a ," sv"
 -create l4b 0 ,  \ astn
--create l4c 3 , char d , char e , char v ,  \ ctn
--create l4d 3 , char a , char d , char v ,  \ actn
--create l4e 2 , char g , char n ,  \ sctn
--create l4f 3 , char a , char g , char n ,  \ asctn
+-create l4c ," dev"
+-create l4d ," adv"
+-create l4e ," gn"
+-create l4f ," agn"
 
--create l50 1 , char m ,  \ wn
--create l51 2 , char a , char m ,  \ awn
--create l52 2 , char s , char m ,  \ swn
--create l53 3 , char a , char s , char m ,  \ aswn
--create l54 2 , char p , char n ,  \ cwn
--create l55 3 , char a , char m , char m ,  \ acwn
+-create l50 ," m" \ 1 , char m ,  \ wn
+-create l51 ," am" \ 2 , char a , char m ,  \ awn
+-create l52 ," sm" \ 2 , char s , char m ,  \ swn
+-create l53 ," asm" \ 3 , char a , char s , char m ,  \ aswn
+-create l54 ," pn" \ 2 , char p , char n ,  \ cwn
+-create l55 ," amm" \ 3 , char a , char m , char m ,  \ acwn
 -create l56 0 ,  \ scwn
--create l57 3 , char a , char p , char p ,  \ ascwn
--create l58 1 , char j ,  \ twn
--create l59 2 , char a , char j ,  \ atwn
+-create l57 ," app" \ 3 , char a , char p , char p ,  \ ascwn
+-create l58 ," j" \ 1 , char j ,  \ twn
+-create l59 ," aj" \ 2 , char a , char j ,  \ atwn
 -create l5a 0 ,  \ stwn
 -create l5b 0 ,  \ astwn
--create l5c 3 , char d , char e , char m ,  \ ctwn
--create l5d 3 , char a , char d , char m ,  \ actwn
+-create l5c ," dem" \ 3 , char d , char e , char m ,  \ ctwn
+-create l5d ," adm" \ 3 , char a , char d , char m ,  \ actwn
 -create l5e 0 ,  \ sctwn
--create l5f 2 , char a , char d , char j ,  \ asctwn
+-create l5f ," adj" \ 3 , char a , char d , char j ,  \ asctwn
 
 -create l60 1 , char y ,  \ hn
 -create l61 2 , char a , char y ,  \ ahn
@@ -424,54 +415,54 @@ cvariable right
 -create lce 2 , char g , char l ,  \ sctnr
 -create lcf 3 , char a , char g , char l ,  \ asctnr
 
--create ld0 2 , char m , char r ,  \ wnr
--create ld1 3 , char a , char l , char l ,  \ awnr
+-create ld0 ," mr"
+-create ld1 ," all"
 -create ld2 0 ,  \ swnr
 -create ld3 0 ,  \ aswnr
--create ld4 2 , char p , char l ,  \ cwnr
--create ld5 3 , char a , char p , char l ,  \ acwnr
--create ld6 3 , char s , char p , char l ,  \ scwnr
--create ld7 4 , char a , char p , char p , char l ,  \ ascwnr
--create ld8 3 , char j , char e , char r ,  \ twnr
+-create ld4 ," pl"
+-create ld5 ," apl"
+-create ld6 ," spl"
+-create ld7 ," appl"
+-create ld8 ," jer"
 -create ld9 0 ,  \ atwnr
--create lda 4 , char s , char e , char r , char v ,  \ stwnr
+-create lda ," serv"
 -create ldb 0 ,  \ astwnr
 -create ldc 0 ,  \ ctwnr
--create ldd 4 , char a , char d , char d , char l ,  \ actwnr
+-create ldd ," addl"
 -create lde 0 ,  \ sctwnr
--create ldf 4 , char a , char g , char g , char l ,  \ asctwnr
+-create ldf ," aggl"
 
--create le0 2 , char l , char y ,  \ hnr
+-create le0 ," ly"
 -create le1 0 ,  \ ahnr
--create le2 3 , char s , char l , char y ,  \ shnr
+-create le2 ," sly"
 -create le3 0 ,  \ ashnr
--create le4 3 , char c , char r , char y ,  \ chnr
--create le5 4 , char a , char c , char c , char l ,  \ achnr
+-create le4 ," cry"
+-create le5 ," accl"
 -create le6 0 ,  \ schnr
 -create le7 0 ,  \ aschnr
--create le8 3 , char t , char r , char y ,  \ thnr
--create le9 4 , char a , char t , char h , char l ,  \ athnr
--create lea 4 , char s , char t , char r , char y ,  \ sthnr
+-create le8 ," try"
+-create le9 ," athl"
+-create lea ," stry"
 -create leb 0 ,  \ asthnr
--create lec 2 , char f , char l ,  \ cthnr
--create led 3 , char a , char f , char l ,  \ acthnr
+-create lec ," fl"
+-create led ," afl"
 -create lee 0 , \ scthnr
--create lef 4 , char a , char f , char f , char l ,  \ ascthnr
+-create lef ," affl"
 
 -create lf0 0 ,  \ whnr
 -create lf1 0 ,  \ awhnr
 -create lf2 0 ,  \ swhnr
 -create lf3 0 ,  \ aswhnr
--create lf4 3 , char p , char h , char l ,  \ cwhnr
+-create lf4 ," phl"
 -create lf5 0 ,  \ acwhnr
 -create lf6 0 ,  \ scwhnr
 -create lf7 0 ,  \ ascwhnr
--create lf8 2 , char k , char l ,  \ twhnr
+-create lf8 ," kl"
 -create lf9 0 ,  \ atwhnr
 -create lfa 0 ,  \ stwhnr
 -create lfb 0 ,  \ astwhnr
--create lfc 2 , char b , char l ,  \ ctwhnr
--create lfd 3 , char a , char b , char l ,  \ actwhnr
+-create lfc ," bl"
+-create lfd ," abl"
 -create lfe 0 ,  \ sctwhnr
 -create lff 0 ,  \ asctwhnr
 
@@ -616,7 +607,7 @@ create center-table
 -create r3c ," lf"
 -create r3d 0 ,
 -create r3e ," mp"
--create r3f ," rd" \ CWS 3/29/20
+-create r3f 0 , \ ," rd" \ CWS 3/29/22
 
 -create r40 ," t"
 -create r41 ," rt"
@@ -773,8 +764,8 @@ create center-table
 
 -create rd0 ," cts"
 -create rd1 0 ,
--create rd2 0 ,
--create rd3 0 ,
+-create rd2 ," tions" \ 0 ,
+-create rd3 ," ctions" \ 0 ,
 -create rd4 0 ,
 -create rd5 0 ,
 -create rd6 0 ,
@@ -884,6 +875,7 @@ create right-table
 
 : write  now c@ before c!  false now c!
     right c@ $8c #, = if/ +caps -space then
+    right c@ $cc #, = if/ +caps +space then
     *key1? *key2? or if/ backspaces exit then
     left c@ 0= if/  \ endings
          center c@ 0= if/
