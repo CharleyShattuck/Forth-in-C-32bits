@@ -89,7 +89,7 @@ variable last-sourceline
 	r@ put-load-file-name
 	#tab r@ emit-file throw
 	[char] + r@ emit-file throw
-	base @ decimal   sourceline# 0 <# #s #> r@
+	base @ decimal   sourceline# 1 - 0 max 0 <# #s #> r@
 	   write-line throw   base !
 	rdrop
     endif ;

@@ -96,8 +96,8 @@ code dnegate  58 ,
 code nip  60 ,
 code initMCP23017  61 ,
 code @MCP23017  62 ,
-code initGPIO  63 ,
-code @GPIO  64 ,
+code initGPIO  63 ,  \ to become !pin
+code pinMode  64 ,
 code lshift  65 ,
 code rshift  66 ,
 code Keyboard.begin  67 ,
@@ -131,6 +131,7 @@ code @pin 74 ,
 :m cvariable  code 14 , ramHERE , 1 ramALLOT m;
 :m wvariable  code 14 , ramHERE , 2 ramALLOT m;
 :m variable  code 14 , ramHERE , 4 ramALLOT m;
+:m constant  code 14 , , m;
 :m create  -code 14 , HERE [ 2/ 1+ ] , header m;
 :m -create  HERE [ 2/ ] constant m;
 

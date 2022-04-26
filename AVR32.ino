@@ -438,20 +438,13 @@ void _fetchMCP23017(){
     T&=0xffff;
 }
 
-// all the I/O pins needed for the steno keyboard
-void _initGPIO(){
-    pinMode(7, INPUT_PULLUP);
-    pinMode(9, INPUT_PULLUP);
-    pinMode(10, INPUT_PULLUP);
-    pinMode(11, INPUT_PULLUP);
-    pinMode(12, INPUT_PULLUP);
-    pinMode(A1, INPUT_PULLUP);
-    pinMode(A2, INPUT_PULLUP);
-    pinMode(A3, INPUT_PULLUP);
-    pinMode(A4, INPUT_PULLUP);
-    pinMode(A5, INPUT_PULLUP);
+void _initPin(){
+    int a = T; DROP;
+    int b = T; DROP;
+    pinMode(a, b);
 }
 
+// turn this into _storePin
 void _fetchGPIO(){
     DUP;
     T=digitalRead(9);
@@ -466,10 +459,6 @@ void _fetchGPIO(){
     T^=0x01ff;
 }
 
-// void _fetchSLIDER(){
-//     DUP;
-//     T=digitalRead(7);
-// }
 void _fetchPin(){
     int a = T;
     T = -(digitalRead(a));
@@ -533,7 +522,7 @@ void (*function[])()={
     _wfetchplus , _umstar , _umslashmod , // 55
     _wfetch , _wstore , _dnegate , // 58
     _squote , _nip , _initMCP23017 , _fetchMCP23017 , // 62
-    _initGPIO , _fetchGPIO , _lshift , _rshift , // 66
+    _fetchGPIO , _initPin , _lshift , _rshift , // 66
     _Keyboard_begin , _Keyboard_press , // 68
     _Keyboard_release , _Keyboard_releaseAll , _Keyboard_end , // 71
     _dropzbranch , _Keyboard_write , _fetchPin , // 74
