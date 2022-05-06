@@ -2,9 +2,9 @@
 target
 
 \ Arduino constants
-0 constant INPUT
-1 constant OUTPUT
-2 constant INPUT_PULLUP
+0 wconstant INPUT
+1 wconstant OUTPUT
+2 wconstant INPUT_PULLUP
 
 \ serial mode's array 
 variable data 4 ramALLOT \ 6 bytes in all

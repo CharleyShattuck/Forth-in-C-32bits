@@ -131,12 +131,13 @@ code @pin 74 ,
 :m cvariable  code 14 , ramHERE , 1 ramALLOT m;
 :m wvariable  code 14 , ramHERE , 2 ramALLOT m;
 :m variable  code 14 , ramHERE , 4 ramALLOT m;
-:m constant  code 14 , , m;
+:m wconstant  code 14 , , m;
 :m create  -code 14 , HERE [ 2/ 1+ ] , header m;
 :m -create  HERE [ 2/ ] constant m;
 
 \ think of #, as a literal instruction in an assembler
 :m #,  lit [ dup $ffff and ] , [ $10000 / $ffff and ] , m;
+:m constant ( n)  code #, exit m;
 :m [']  [ ' >body @ ] #, m;
 :m ,"  here 0 , [ [char] " word count 0 do
         count ,-t loop drop ]
