@@ -137,8 +137,8 @@ code @pin 74 ,
 
 \ think of #, as a literal instruction in an assembler
 :m #,  lit [ dup $ffff and ] , [ $10000 / $ffff and ] , m;
-:m constant ( n)  code #, exit m;
 :m [']  [ ' >body @ ] #, m;
+:m ',  [ ' >body @ ] , m;
 :m ,"  here 0 , [ [char] " word count 0 do
         count ,-t loop drop ]
     here [ over - 2/ 1 - swap !-t ] m;
@@ -190,6 +190,9 @@ cvariable base
 : max ( a b - c)
     over over - -if drop swap drop exit then
     drop drop ;
+: min ( a b - c)
+    over over - -if drop drop exit then
+    drop swap drop ;
 
 0 [if] \ these were used before <# # #> were defined
 -: dig ( n1 - n2 n3)  dup 2/ 2/ 2/ 2/ swap

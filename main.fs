@@ -12,11 +12,13 @@ variable data 4 ramALLOT \ 6 bytes in all
 
 : initPortExpander  $20 #, initMCP23017 ;
 : initPins
+    INPUT_PULLUP  5 #, pinMode
     INPUT_PULLUP  7 #, pinMode
     INPUT_PULLUP  9 #, pinMode
     INPUT_PULLUP 10 #, pinMode
     INPUT_PULLUP 11 #, pinMode
     INPUT_PULLUP 12 #, pinMode
+    INPUT_PULLUP 18 #, pinMode
     INPUT_PULLUP 19 #, pinMode
     INPUT_PULLUP 20 #, pinMode
     INPUT_PULLUP 21 #, pinMode
@@ -45,6 +47,18 @@ variable data 4 ramALLOT \ 6 bytes in all
 : release ( n1 - n2)  begin @pins while or repeat drop ;
 : scan (  - n)
     begin press 30 #, ms @pins if or release exit then drop drop again
+
+\ vectored emit, for testing
+wvariable 'spit  \ execution tokens are 16 bits
+: spit  'spit w@ execute ; 
+: >emit  ['] emit 'spit w! ; 
+: >hc.  ['] hc. 'spit w! ; 
+: send  data a! 5 #, for c@+ spit next ; \ Gemini
+: ?send  data a!  \ TX Bolt
+    c@+ if dup spit then drop
+    c@+ if dup $40 #, or spit then drop
+    c@+ if dup $80 #, or spit then drop
+    c@+ if $c0 #, or spit exit then spit ;
 
 \ Gemini protocol to the data array
 : mark ( mask a)  data + dup >r c@ or r> c! ; 
@@ -75,6 +89,7 @@ variable data 4 ramALLOT \ 6 bytes in all
     dup $0000040 #, and if/ $08 #, 3 #, mark then \ E
     dup $0000080 #, and if/ $04 #, 3 #, mark then \ U
     drop ; 
+: send-Gemini  Gemini send ;
 
 \ TX Bolt protocol to the data array
 : bolt ( n)  /data
@@ -104,21 +119,11 @@ variable data 4 ramALLOT \ 6 bytes in all
     dup $0000400 #, and if/ $08 #, 3 #, mark then \ Z
     dup $0000020 #, and if/ $10 #, 3 #, mark then \ #
     drop ; 
+: send-TXBolt  bolt ?send ;
 
 \ A-Z
 
-
-\ vectored emit, for testing
-wvariable 'spit  \ execution tokens are 16 bits
-: spit  'spit w@ execute ; 
-: >emit  ['] emit 'spit w! ; 
-: >hc.  ['] hc. 'spit w! ; 
-: send  data a! 5 #, for c@+ spit next ; \ Gemini
-: ?send  data a!  \ TX Bolt
-    c@+ if dup spit then drop
-    c@+ if dup $40 #, or spit then drop
-    c@+ if dup $80 #, or spit then drop
-    c@+ if $c0 #, or spit exit then spit ;
+: send-A-Z  ;
 
 \ NKRO keyboard mode
 cvariable former
@@ -160,11 +165,27 @@ cvariable former
     drop Keyboard.releaseAll ; 
 
 \ slider switch determines the protocol
+: @sliders ( - n)
+    5 #, @pin 4 #, and  18 #, @pin 2 #, and or
+    7 #, @pin 1 #, and or  7 #, xor ;
+
+create protocols
+    ', send-TXBolt
+    ', send-NKRO
+    ', send-Gemini
+    ', send-A-Z
+
 \ : choose  7 #, @pin if/ Gemini send exit then send-NKRO ;
-: choose  7 #, @pin if/ bolt ?send exit then send-NKRO ;
-: go  begin scan choose again
+\ : choose  7 #, @pin if/ bolt ?send exit then send-NKRO ;
+\ : go  begin scan choose again
+
+: go
+    begin  scan
+        @sliders 1 #, min
+        protocols + @p execute
+    again
 
 turnkey decimal init Keyboard.begin
-\    >hc. interpret
-    >emit go
+\   >hc. interpret
+   >emit go
 
