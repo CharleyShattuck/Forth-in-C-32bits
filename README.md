@@ -1,16 +1,5 @@
 # AVR32
 ITC Forth in C for the AVR 32u4 with 32 bit stacks, 16 bit program memory. Porting ARM code to AVR. The VM is written with Arduino Wiring, and Forth core and app are written using a target compiler written in gforth. The Forth compiler's output is a memory array that's used when compiling the VM. I hope that makes sense.
 
-# How the Keyboard Firmware Works
-We'll start with explaining the top level file, main.fs, where the source code for the keyboard firmware is.
-
-line 1 
-**\ main.fs**
-That's a comment with the name of the file in it.
-
-Line 2
-**target**
-changes search order so that target words are found first. The word "host" causes host words, which are compiler words, to be found first.
-
-Lines 4-7 define three constants, used to initialize the IO ports. A constant is a word (function) which pushes a number onto the data stack when executed. These are called wconstant because they push a 16 bit word onto the stack. If a 32 bit word is wanted then use #, to compile a 32 bit literal inline.
-
+# See TinyMod5 for more of this.
+This repository is no longer active. I've moved development over to TinyMod5. Also TinyMod-split will be based on this.
